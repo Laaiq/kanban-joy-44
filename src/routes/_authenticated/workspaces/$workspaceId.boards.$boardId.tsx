@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/workspaces/$workspaceId/bo
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: BoardPage;
+  component: BoardPage,
 });
 
 function BoardPage() {
