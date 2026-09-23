@@ -189,7 +189,21 @@ function WorkspaceDetailPage() {
             {data.description ? ` · ${data.description}` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/workspaces/$workspaceId/boards"
+            params={{ workspaceId }}
+            className="rounded-xl border border-border bg-frost/40 px-3.5 py-2 text-sm font-medium text-ice transition-transform hover:-translate-y-px"
+          >
+            Boards
+          </Link>
+          <Link
+            to="/workspaces/$workspaceId/roadmap"
+            params={{ workspaceId }}
+            className="rounded-xl border border-volt/40 bg-volt/10 px-3.5 py-2 text-sm font-semibold text-volt transition-transform hover:-translate-y-px"
+          >
+            Roadmap
+          </Link>
           {canPlan && (
             <button
               onClick={() => setPlanOpen(true)}
