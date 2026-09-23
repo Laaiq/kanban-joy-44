@@ -297,7 +297,7 @@ export const removeMember = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ memberId: z.string().uuid(), workspaceId: z.string().uuid() }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<MutationResult> => {
     const { supabase } = context;
 
     const { data: member, error: readError } = await supabase
@@ -315,11 +315,12 @@ export const removeMember = createServerFn({ method: "POST" })
         .eq("workspace_id", data.workspaceId)
         .eq("role", "owner");
       if (ownersError) fail(ownersError.message);
-      if ((owners ?? []).length <= 1) fail("You can't remove the last owner of a workspace.");
+      if ((owners ?? []).length <= 1)
+        return { ok: false, message: "You can't remove the last owner of a workspace." };
     }
 
     const { error } = await supabase.from("workspace_members").delete().eq("id", data.memberId);
-    if (error) fail("You don't have permission to remove members here.");
+    if (error) return { ok: false, message: "You don't have permission to remove members here." };
     return { ok: true };
   });
 
