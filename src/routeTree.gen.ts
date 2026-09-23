@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedWorkspacesIndexRouteImport } from './routes/_authenticated/workspaces/index'
 import { Route as AuthenticatedWorkspacesWorkspaceIdIndexRouteImport } from './routes/_authenticated/workspaces/$workspaceId.index'
+import { Route as AuthenticatedWorkspacesWorkspaceIdBoardsIndexRouteImport } from './routes/_authenticated/workspaces/$workspaceId.boards.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,18 +42,26 @@ const AuthenticatedWorkspacesWorkspaceIdIndexRoute =
     path: '/workspaces/$workspaceId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute =
+  AuthenticatedWorkspacesWorkspaceIdBoardsIndexRouteImport.update({
+    id: '/workspaces/$workspaceId/boards/',
+    path: '/workspaces/$workspaceId/boards/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/workspaces/': typeof AuthenticatedWorkspacesIndexRoute
   '/workspaces/$workspaceId/': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
+  '/workspaces/$workspaceId/boards/': typeof AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/workspaces': typeof AuthenticatedWorkspacesIndexRoute
   '/workspaces/$workspaceId': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
+  '/workspaces/$workspaceId/boards': typeof AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,12 +70,23 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/workspaces/': typeof AuthenticatedWorkspacesIndexRoute
   '/_authenticated/workspaces/$workspaceId/': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
+  '/_authenticated/workspaces/$workspaceId/boards/': typeof AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/workspaces/' | '/workspaces/$workspaceId/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/workspaces/'
+    | '/workspaces/$workspaceId/'
+    | '/workspaces/$workspaceId/boards/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/workspaces' | '/workspaces/$workspaceId'
+  to:
+    | '/'
+    | '/auth'
+    | '/workspaces'
+    | '/workspaces/$workspaceId'
+    | '/workspaces/$workspaceId/boards'
   id:
     | '__root__'
     | '/'
@@ -74,6 +94,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/workspaces/'
     | '/_authenticated/workspaces/$workspaceId/'
+    | '/_authenticated/workspaces/$workspaceId/boards/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,18 +140,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workspaces/$workspaceId/boards/': {
+      id: '/_authenticated/workspaces/$workspaceId/boards/'
+      path: '/workspaces/$workspaceId/boards'
+      fullPath: '/workspaces/$workspaceId/boards/'
+      preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceIdBoardsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedWorkspacesIndexRoute: typeof AuthenticatedWorkspacesIndexRoute
   AuthenticatedWorkspacesWorkspaceIdIndexRoute: typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
+  AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute: typeof AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWorkspacesIndexRoute: AuthenticatedWorkspacesIndexRoute,
   AuthenticatedWorkspacesWorkspaceIdIndexRoute:
     AuthenticatedWorkspacesWorkspaceIdIndexRoute,
+  AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute:
+    AuthenticatedWorkspacesWorkspaceIdBoardsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
