@@ -171,6 +171,7 @@ function WorkspaceDetailPage() {
 
   const data = workspace.data;
   const isOwner = data.myRole === "owner";
+  const canPlan = data.myRole === "owner" || data.myRole === "editor";
 
   return (
     <AppShell eyebrow="Workspace · Members">
