@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell, initials } from "@/components/app-shell";
+import { BoardPlanDialog } from "@/components/board-plan-dialog";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { ROLE_COPY, RoleBadge } from "@/components/role-badge";
 import {
