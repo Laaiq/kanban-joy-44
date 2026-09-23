@@ -20,7 +20,7 @@ import {
 
 const ROLES: Role[] = ["owner", "editor", "viewer"];
 
-export const Route = createFileRoute("/_authenticated/workspaces/$workspaceId")({
+export const Route = createFileRoute("/_authenticated/workspaces/$workspaceId/")({
   head: () => ({
     meta: [
       { title: "Workspace members — Meridian" },
