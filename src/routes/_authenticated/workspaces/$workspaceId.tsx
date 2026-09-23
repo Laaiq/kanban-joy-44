@@ -326,6 +326,13 @@ function WorkspaceDetailPage() {
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
       />
+
+      <BoardPlanDialog
+        workspaceId={workspaceId}
+        workspaceName={data.name}
+        open={planOpen}
+        onClose={() => setPlanOpen(false)}
+      />
     </AppShell>
   );
 }
