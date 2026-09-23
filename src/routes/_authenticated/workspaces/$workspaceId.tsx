@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell, initials } from "@/components/app-shell";
+import { BoardPlanDialog } from "@/components/board-plan-dialog";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { ROLE_COPY, RoleBadge } from "@/components/role-badge";
 import {
@@ -39,6 +40,7 @@ function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
 
   const fetchWorkspace = useServerFn(getWorkspace);
   const changeRole = useServerFn(updateMemberRole);
@@ -171,6 +173,7 @@ function WorkspaceDetailPage() {
 
   const data = workspace.data;
   const isOwner = data.myRole === "owner";
+  const canPlan = data.myRole === "owner" || data.myRole === "editor";
 
   return (
     <AppShell eyebrow="Workspace · Members">
@@ -185,6 +188,16 @@ function WorkspaceDetailPage() {
             <span className="text-volt">{ROLE_COPY[data.myRole].label.toLowerCase()}</span>
             {data.description ? ` · ${data.description}` : ""}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {canPlan && (
+            <button
+              onClick={() => setPlanOpen(true)}
+              className="rounded-xl border border-volt/40 bg-volt/10 px-3.5 py-2 text-sm font-semibold text-volt transition-transform hover:-translate-y-px"
+            >
+              Plan a board
+            </button>
+          )}
         </div>
         {isOwner && (
           <div className="flex items-center gap-2">
@@ -312,6 +325,13 @@ function WorkspaceDetailPage() {
         workspaceName={data.name}
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
+      />
+
+      <BoardPlanDialog
+        workspaceId={workspaceId}
+        workspaceName={data.name}
+        open={planOpen}
+        onClose={() => setPlanOpen(false)}
       />
     </AppShell>
   );
