@@ -77,7 +77,11 @@ function WorkspaceDetailPage() {
   });
 
   const removeMutation = useMutation({
-    mutationFn: (memberId: string) => kick({ data: { memberId, workspaceId } }),
+    mutationFn: async (memberId: string) => {
+      const result = await kick({ data: { memberId, workspaceId } });
+      if (!result.ok) throw new Error(result.message);
+      return result;
+    },
     onMutate: async (memberId) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<WorkspaceDetail>(queryKey);
