@@ -187,6 +187,16 @@ function WorkspaceDetailPage() {
             {data.description ? ` · ${data.description}` : ""}
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          {canPlan && (
+            <button
+              onClick={() => setPlanOpen(true)}
+              className="rounded-xl border border-volt/40 bg-volt/10 px-3.5 py-2 text-sm font-semibold text-volt transition-transform hover:-translate-y-px"
+            >
+              Plan a board
+            </button>
+          )}
+        </div>
         {isOwner && (
           <div className="flex items-center gap-2">
             <button
