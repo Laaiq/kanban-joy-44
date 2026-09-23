@@ -39,6 +39,7 @@ function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
 
   const fetchWorkspace = useServerFn(getWorkspace);
   const changeRole = useServerFn(updateMemberRole);
