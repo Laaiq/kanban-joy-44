@@ -259,7 +259,7 @@ export const updateMemberRole = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ memberId: z.string().uuid(), workspaceId: z.string().uuid(), role: roleSchema }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<MutationResult> => {
     const { supabase, userId } = context;
 
     const { data: member, error: readError } = await supabase
@@ -268,7 +268,7 @@ export const updateMemberRole = createServerFn({ method: "POST" })
       .eq("id", data.memberId)
       .maybeSingle();
     if (readError) fail(readError.message);
-    if (!member) fail("That member no longer exists.");
+    if (!member) return { ok: false, message: "That member no longer exists." };
 
     if (member.user_id === userId && member.role === "owner" && data.role !== "owner") {
       const { data: owners, error: ownersError } = await supabase
@@ -277,14 +277,15 @@ export const updateMemberRole = createServerFn({ method: "POST" })
         .eq("workspace_id", data.workspaceId)
         .eq("role", "owner");
       if (ownersError) fail(ownersError.message);
-      if ((owners ?? []).length <= 1) fail("A workspace needs at least one owner. Promote someone else first.");
+      if ((owners ?? []).length <= 1)
+        return { ok: false, message: "A workspace needs at least one owner. Promote someone else first." };
     }
 
     const { error } = await supabase
       .from("workspace_members")
       .update({ role: data.role })
       .eq("id", data.memberId);
-    if (error) fail("You don't have permission to change roles here.");
+    if (error) return { ok: false, message: "You don't have permission to change roles here." };
 
     return { ok: true };
   });
