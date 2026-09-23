@@ -50,8 +50,11 @@ function WorkspaceDetailPage() {
   const workspace = useQuery({ queryKey, queryFn: () => fetchWorkspace({ data: { workspaceId } }) });
 
   const roleMutation = useMutation({
-    mutationFn: (input: { memberId: string; role: Role }) =>
-      changeRole({ data: { memberId: input.memberId, workspaceId, role: input.role } }),
+    mutationFn: async (input: { memberId: string; role: Role }) => {
+      const result = await changeRole({ data: { memberId: input.memberId, workspaceId, role: input.role } });
+      if (!result.ok) throw new Error(result.message);
+      return result;
+    },
     onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<WorkspaceDetail>(queryKey);
