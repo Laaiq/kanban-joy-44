@@ -43,6 +43,8 @@ export type WorkspaceDetail = {
 
 const roleSchema = z.enum(["owner", "editor", "viewer"]);
 
+export type MutationResult = { ok: true } | { ok: false; message: string };
+
 function fail(message: string): never {
   throw new Error(message);
 }
