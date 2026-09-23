@@ -325,7 +325,14 @@ export const updateCard = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      column_id?: string;
+      title?: string;
+      description?: string | null;
+      assignee_id?: string | null;
+      due_date?: string | null;
+      labels?: string[];
+    } = {};
     if (data.columnId !== undefined) patch["column_id"] = data.columnId;
     if (data.title !== undefined) patch["title"] = data.title;
     if (data.description !== undefined) patch["description"] = data.description;
