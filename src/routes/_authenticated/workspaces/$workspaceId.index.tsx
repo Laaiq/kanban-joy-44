@@ -198,6 +198,13 @@ function WorkspaceDetailPage() {
             Boards
           </Link>
           <Link
+            to="/workspaces/$workspaceId/dashboard"
+            params={{ workspaceId }}
+            className="rounded-xl border border-border bg-frost/40 px-3.5 py-2 text-sm font-medium text-ice transition-transform hover:-translate-y-px"
+          >
+            Dashboard
+          </Link>
+          <Link
             to="/workspaces/$workspaceId/roadmap"
             params={{ workspaceId }}
             className="rounded-xl border border-volt/40 bg-volt/10 px-3.5 py-2 text-sm font-semibold text-volt transition-transform hover:-translate-y-px"
