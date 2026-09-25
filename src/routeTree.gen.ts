@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedWorkspacesIndexRouteImport } from './routes/_authenticated/workspaces/index'
 import { Route as AuthenticatedWorkspacesWorkspaceIdIndexRouteImport } from './routes/_authenticated/workspaces/$workspaceId.index'
+import { Route as AuthenticatedWorkspacesWorkspaceIdDashboardRouteImport } from './routes/_authenticated/workspaces/$workspaceId.dashboard'
 import { Route as AuthenticatedWorkspacesWorkspaceIdRoadmapRouteImport } from './routes/_authenticated/workspaces/$workspaceId.roadmap'
 import { Route as AuthenticatedWorkspacesWorkspaceIdBoardsIndexRouteImport } from './routes/_authenticated/workspaces/$workspaceId.boards.index'
 import { Route as AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRouteImport } from './routes/_authenticated/workspaces/$workspaceId.boards.$boardId'
@@ -44,6 +45,12 @@ const AuthenticatedWorkspacesWorkspaceIdIndexRoute =
     path: '/workspaces/$workspaceId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWorkspacesWorkspaceIdDashboardRoute =
+  AuthenticatedWorkspacesWorkspaceIdDashboardRouteImport.update({
+    id: '/workspaces/$workspaceId/dashboard',
+    path: '/workspaces/$workspaceId/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkspacesWorkspaceIdRoadmapRoute =
   AuthenticatedWorkspacesWorkspaceIdRoadmapRouteImport.update({
     id: '/workspaces/$workspaceId/roadmap',
@@ -67,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/workspaces/': typeof AuthenticatedWorkspacesIndexRoute
+  '/workspaces/$workspaceId/dashboard': typeof AuthenticatedWorkspacesWorkspaceIdDashboardRoute
   '/workspaces/$workspaceId/roadmap': typeof AuthenticatedWorkspacesWorkspaceIdRoadmapRoute
   '/workspaces/$workspaceId/': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
   '/workspaces/$workspaceId/boards/$boardId': typeof AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRoute
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/workspaces': typeof AuthenticatedWorkspacesIndexRoute
+  '/workspaces/$workspaceId/dashboard': typeof AuthenticatedWorkspacesWorkspaceIdDashboardRoute
   '/workspaces/$workspaceId/roadmap': typeof AuthenticatedWorkspacesWorkspaceIdRoadmapRoute
   '/workspaces/$workspaceId': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
   '/workspaces/$workspaceId/boards/$boardId': typeof AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRoute
@@ -87,6 +96,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/workspaces/': typeof AuthenticatedWorkspacesIndexRoute
+  '/_authenticated/workspaces/$workspaceId/dashboard': typeof AuthenticatedWorkspacesWorkspaceIdDashboardRoute
   '/_authenticated/workspaces/$workspaceId/roadmap': typeof AuthenticatedWorkspacesWorkspaceIdRoadmapRoute
   '/_authenticated/workspaces/$workspaceId/': typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
   '/_authenticated/workspaces/$workspaceId/boards/$boardId': typeof AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRoute
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/workspaces/'
+    | '/workspaces/$workspaceId/dashboard'
     | '/workspaces/$workspaceId/roadmap'
     | '/workspaces/$workspaceId/'
     | '/workspaces/$workspaceId/boards/$boardId'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/workspaces'
+    | '/workspaces/$workspaceId/dashboard'
     | '/workspaces/$workspaceId/roadmap'
     | '/workspaces/$workspaceId'
     | '/workspaces/$workspaceId/boards/$boardId'
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/workspaces/'
+    | '/_authenticated/workspaces/$workspaceId/dashboard'
     | '/_authenticated/workspaces/$workspaceId/roadmap'
     | '/_authenticated/workspaces/$workspaceId/'
     | '/_authenticated/workspaces/$workspaceId/boards/$boardId'
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workspaces/$workspaceId/dashboard': {
+      id: '/_authenticated/workspaces/$workspaceId/dashboard'
+      path: '/workspaces/$workspaceId/dashboard'
+      fullPath: '/workspaces/$workspaceId/dashboard'
+      preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceIdDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workspaces/$workspaceId/roadmap': {
       id: '/_authenticated/workspaces/$workspaceId/roadmap'
       path: '/workspaces/$workspaceId/roadmap'
@@ -192,6 +212,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedWorkspacesIndexRoute: typeof AuthenticatedWorkspacesIndexRoute
+  AuthenticatedWorkspacesWorkspaceIdDashboardRoute: typeof AuthenticatedWorkspacesWorkspaceIdDashboardRoute
   AuthenticatedWorkspacesWorkspaceIdRoadmapRoute: typeof AuthenticatedWorkspacesWorkspaceIdRoadmapRoute
   AuthenticatedWorkspacesWorkspaceIdIndexRoute: typeof AuthenticatedWorkspacesWorkspaceIdIndexRoute
   AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRoute: typeof AuthenticatedWorkspacesWorkspaceIdBoardsBoardIdRoute
@@ -200,6 +221,8 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWorkspacesIndexRoute: AuthenticatedWorkspacesIndexRoute,
+  AuthenticatedWorkspacesWorkspaceIdDashboardRoute:
+    AuthenticatedWorkspacesWorkspaceIdDashboardRoute,
   AuthenticatedWorkspacesWorkspaceIdRoadmapRoute:
     AuthenticatedWorkspacesWorkspaceIdRoadmapRoute,
   AuthenticatedWorkspacesWorkspaceIdIndexRoute:
