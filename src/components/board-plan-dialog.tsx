@@ -1,9 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { generateBoardPlan, type BoardPlan } from "@/lib/board-plan.functions";
+import { createBoardFromPlan, generateBoardPlan, type BoardPlan } from "@/lib/board-plan.functions";
 
 const MIN_BRIEF = 40;
 
@@ -21,6 +22,32 @@ export function BoardPlanDialog({
   const [brief, setBrief] = useState("");
   const [plan, setPlan] = useState<BoardPlan | null>(null);
   const run = useServerFn(generateBoardPlan);
+  const build = useServerFn(createBoardFromPlan);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const buildMutation = useMutation({
+    mutationFn: async (p: BoardPlan) => {
+      const result = await build({ data: { workspaceId, brief: brief.trim(), plan: p } });
+      if (!result.ok) throw new Error(result.message);
+      return result;
+    },
+    onSuccess: async (result) => {
+      toast.success("Board created", { description: `${result.cards} cards are ready to work on.` });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] }),
+        queryClient.invalidateQueries({ queryKey: ["roadmap", workspaceId] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard", workspaceId] }),
+      ]);
+      setPlan(null);
+      onClose();
+      navigate({ to: "/workspaces/$workspaceId/boards/$boardId", params: { workspaceId, boardId: result.boardId } });
+    },
+    onError: (error: unknown) =>
+      toast.error("Couldn't create the board", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      }),
+  });
 
   const mutation = useMutation({
     mutationFn: async (input: { workspaceId: string; brief: string }) => {
@@ -165,9 +192,19 @@ export function BoardPlanDialog({
               </div>
             ) : null}
 
-            <p className="text-[11px] leading-relaxed text-mist">
-              This is a draft plan. Once boards are live you'll be able to create these columns and cards in one tap.
-            </p>
+            <div className="glass-panel flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
+              <p className="text-[11px] leading-relaxed text-mist">
+                Creates a board with these columns and cards. Due dates count from today; you can assign people afterwards.
+              </p>
+              <button
+                type="button"
+                onClick={() => buildMutation.mutate(plan)}
+                disabled={buildMutation.isPending}
+                className="shrink-0 rounded-xl bg-volt px-4 py-2 text-sm font-semibold text-ink shadow-volt transition-transform hover:-translate-y-px disabled:opacity-50"
+              >
+                {buildMutation.isPending ? "Creating board…" : "Create this board"}
+              </button>
+            </div>
           </div>
         ) : null}
       </div>
