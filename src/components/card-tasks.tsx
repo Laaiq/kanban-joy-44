@@ -91,7 +91,7 @@ export function CardTasks({ boardId, cardId, tasks }: { boardId: string; cardId:
               checked={t.done}
               onChange={() => toggle.mutate(t)}
               aria-label={`Mark ${t.title} ${t.done ? "not done" : "done"}`}
-              className="size-4 accent-[var(--color-volt)]"
+              className="size-4 accent-volt"
             />
             <span className={`flex-1 text-sm ${t.done ? "text-mist line-through" : "text-ice"}`}>{t.title}</span>
             {t.dueDate && <span className="text-[10px] text-mist">{t.dueDate}</span>}

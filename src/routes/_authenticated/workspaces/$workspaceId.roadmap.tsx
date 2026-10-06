@@ -192,7 +192,7 @@ function RoadmapPage() {
 
               <ol className="relative space-y-2 border-l border-border/70 pl-4">
                 {bucket.items.map((item) => (
-                  <li key={item.cardId} className="relative rounded-xl border border-border bg-ink2/60 p-3">
+                  <li key={item.key} className={`relative rounded-xl border bg-ink2/60 p-3 ${item.kind === "task" ? "ml-4 border-dashed border-border/80" : "border-border"}`}>
                     <span
                       className={
                         bucket.tone === "late"
@@ -202,7 +202,12 @@ function RoadmapPage() {
                       aria-hidden
                     />
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h3 className="text-sm font-medium">{item.title}</h3>
+                      <div>
+                        {item.kind === "task" && (
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-volt">Sub-task of {item.parentTitle}</p>
+                        )}
+                        <h3 className="text-sm font-medium">{item.title}</h3>
+                      </div>
                       <span
                         className={
                           bucket.tone === "late"
