@@ -107,6 +107,8 @@ function RoadmapPage() {
 
   const data = roadmap.data;
   const buckets = bucketise(data.items);
+  const cardCount = data.items.filter((item) => item.kind === "card").length;
+  const taskCount = data.items.length - cardCount;
   const dated = data.items.filter((item) => item.dueDate).length;
 
   return (
@@ -122,8 +124,8 @@ function RoadmapPage() {
           </Link>
           <h1 className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">Roadmap</h1>
           <p className="mt-2 text-sm text-mist">
-            {data.boards.length} board{data.boards.length === 1 ? "" : "s"} · {data.items.length} card
-            {data.items.length === 1 ? "" : "s"} · {dated} with a date
+            {data.boards.length} board{data.boards.length === 1 ? "" : "s"} · {cardCount} card
+            {cardCount === 1 ? "" : "s"}{taskCount > 0 ? ` · ${taskCount} open sub-task${taskCount === 1 ? "" : "s"}` : ""} · {dated} with a date
           </p>
         </div>
         <Link
