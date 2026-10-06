@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/workspaces/$workspaceId/da
   component: DashboardPage,
 });
 
-function Stat({ label, value, hint, tone }: { label: string; value: string; hint: string; tone?: "late" | "volt" }) {
+function Stat({ label, value, hint, tone }: { label: string; value: string; hint: string; tone?: "late" | "volt" | undefined }) {
   return (
     <div className="glass-panel rounded-2xl p-5">
       <p className="text-[11px] uppercase tracking-[0.16em] text-mist">{label}</p>
@@ -122,7 +122,7 @@ function DashboardPage() {
             />
             <Stat
               label="Assigned most"
-              value={top ? top.name.split(" ")[0] : "—"}
+              value={top ? (top.name.split(" ")[0] ?? top.name) : "—"}
               hint={top ? `${top.count} card${top.count === 1 ? "" : "s"} · ${d.unassigned} unassigned` : "Nobody is assigned yet"}
               tone="volt"
             />
