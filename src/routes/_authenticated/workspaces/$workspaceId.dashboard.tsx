@@ -122,7 +122,7 @@ function DashboardPage() {
             />
             <Stat
               label="Assigned most"
-              value={top ? top.name.split(" ")[0] : "—"}
+              value={top ? (top.name.split(" ")[0] ?? top.name) : "—"}
               hint={top ? `${top.count} card${top.count === 1 ? "" : "s"} · ${d.unassigned} unassigned` : "Nobody is assigned yet"}
               tone="volt"
             />
