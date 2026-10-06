@@ -90,6 +90,60 @@ export type Database = {
           },
         ]
       }
+      card_tasks: {
+        Row: {
+          board_id: string
+          card_id: string
+          created_at: string
+          created_by: string
+          done: boolean
+          due_date: string | null
+          id: string
+          position: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          board_id: string
+          card_id: string
+          created_at?: string
+          created_by: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          board_id?: string
+          card_id?: string
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_tasks_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_tasks_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cards: {
         Row: {
           assignee_id: string | null

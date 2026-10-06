@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { createCard, updateCard, type Card } from "@/lib/boards.functions";
+import { CardTasks } from "@/components/card-tasks";
 
 type Props = {
   boardId: string;
@@ -35,7 +36,8 @@ export function CardDialog({ boardId, columnId, columns, people, card, open, onC
     setDueDate(card?.dueDate ?? "");
     setLabels((card?.labels ?? []).join(", "));
     setTargetColumn(card?.columnId ?? columnId);
-  }, [open, card, columnId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, card?.id, columnId]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -82,7 +84,7 @@ export function CardDialog({ boardId, columnId, columns, people, card, open, onC
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/80 p-4 backdrop-blur-sm">
-      <div className="glass-panel w-full max-w-lg rounded-2xl p-6">
+      <div className="glass-panel max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-mist">
@@ -197,6 +199,7 @@ export function CardDialog({ boardId, columnId, columns, people, card, open, onC
             </button>
           </div>
         </form>
+        {card && <CardTasks boardId={boardId} cardId={card.id} tasks={card.tasks} />}
       </div>
     </div>
   );

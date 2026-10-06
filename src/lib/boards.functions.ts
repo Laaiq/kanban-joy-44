@@ -14,6 +14,14 @@ export type Card = {
   dueDate: string | null;
   labels: string[];
   position: number;
+  tasks: CardTask[];
+};
+
+export type CardTask = {
+  id: string;
+  title: string;
+  dueDate: string | null;
+  done: boolean;
 };
 
 export type Column = {
@@ -42,6 +50,9 @@ export type BoardDetail = {
 };
 
 export type RoadmapItem = {
+  key: string;
+  kind: "card" | "task";
+  parentTitle: string | null;
   cardId: string;
   title: string;
   description: string | null;
@@ -220,6 +231,19 @@ export const getBoard = createServerFn({ method: "GET" })
 
     const people = await namesFor(supabase, board.workspace_id);
 
+    const { data: taskRows } = await supabase
+      .from("card_tasks")
+      .select("id, card_id, title, due_date, done, position, created_at")
+      .eq("board_id", board.id)
+      .order("position", { ascending: true })
+      .order("created_at", { ascending: true });
+    const tasksByCard = new Map<string, CardTask[]>();
+    for (const t of taskRows ?? []) {
+      const list = tasksByCard.get(t.card_id) ?? [];
+      list.push({ id: t.id, title: t.title, dueDate: t.due_date, done: t.done });
+      tasksByCard.set(t.card_id, list);
+    }
+
     return {
       id: board.id,
       workspaceId: board.workspace_id,
@@ -243,6 +267,7 @@ export const getBoard = createServerFn({ method: "GET" })
             dueDate: card.due_date,
             labels: card.labels ?? [],
             position: card.position,
+            tasks: tasksByCard.get(card.id) ?? [],
           })),
       })),
     };
@@ -387,14 +412,17 @@ export const getRoadmap = createServerFn({ method: "GET" })
 
     let cards: any[] = [];
     let columnNames = new Map<string, string>();
+    let taskRows: { id: string; card_id: string; title: string; due_date: string | null; done: boolean }[] = [];
     if (boardIds.length > 0) {
-      const [cardRes, columnRes] = await Promise.all([
+      const [cardRes, columnRes, taskRes] = await Promise.all([
         supabase
           .from("cards")
           .select("id, board_id, column_id, title, description, due_date, labels, assignee_id")
           .in("board_id", boardIds),
         supabase.from("board_columns").select("id, name").in("board_id", boardIds),
+        supabase.from("card_tasks").select("id, card_id, title, due_date, done").in("board_id", boardIds).eq("done", false),
       ]);
+      taskRows = taskRes.data ?? [];
       cards = cardRes.data ?? [];
       columnNames = new Map((columnRes.data ?? []).map((c) => [c.id as string, c.name as string]));
     }
@@ -409,8 +437,11 @@ export const getRoadmap = createServerFn({ method: "GET" })
       counts.set(card.board_id, entry);
     }
 
-    const items = cards
-      .map<RoadmapItem>((card) => ({
+    const cardById = new Map<string, any>(cards.map((c) => [c.id, c]));
+    const cardItems = cards.map<RoadmapItem>((card) => ({
+        key: card.id,
+        kind: "card",
+        parentTitle: null,
         cardId: card.id,
         title: card.title,
         description: card.description ?? null,
@@ -420,7 +451,27 @@ export const getRoadmap = createServerFn({ method: "GET" })
         dueDate: card.due_date ?? null,
         labels: card.labels ?? [],
         assigneeName: card.assignee_id ? people.get(card.assignee_id) ?? null : null,
-      }))
+      }));
+    const taskItems = taskRows
+      .filter((t) => cardById.has(t.card_id))
+      .map<RoadmapItem>((t) => {
+        const card = cardById.get(t.card_id);
+        return {
+          key: `task-${t.id}`,
+          kind: "task",
+          parentTitle: card.title,
+          cardId: card.id,
+          title: t.title,
+          description: null,
+          boardId: card.board_id,
+          boardName: boardNames.get(card.board_id) ?? "Board",
+          columnName: columnNames.get(card.column_id) ?? "Column",
+          dueDate: t.due_date,
+          labels: [],
+          assigneeName: card.assignee_id ? people.get(card.assignee_id) ?? null : null,
+        };
+      });
+    const items = [...cardItems, ...taskItems]
       .sort((a, b) => {
         if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
         if (a.dueDate) return -1;

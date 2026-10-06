@@ -194,6 +194,11 @@ function BoardPage() {
                       ))}
                     </div>
                   )}
+                  {card.tasks.length > 0 && (
+                    <p className="mt-2 text-[10px] text-mist">
+                      <span className="text-volt">✓</span> {card.tasks.filter((t) => t.done).length}/{card.tasks.length} sub-tasks
+                    </p>
+                  )}
                   <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-mist">
                     {card.assigneeName ?? "Unassigned"}
                     {card.dueDate ? ` · due ${card.dueDate}` : ""}
@@ -244,7 +249,7 @@ function BoardPage() {
         <CardDialog
           boardId={boardId}
           columnId={dialog.columnId}
-          card={dialog.card}
+          card={dialog.card ? (data.columns.flatMap((c) => c.cards).find((c) => c.id === dialog.card!.id) ?? dialog.card) : null}
           columns={data.columns.map((c) => ({ id: c.id, name: c.name }))}
           people={data.people}
           open
