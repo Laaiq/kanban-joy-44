@@ -36,7 +36,7 @@ export function CardTasks({ boardId, cardId, tasks }: { boardId: string; cardId:
     }
     return { previous };
   };
-  const rollback = (ctx: { previous?: BoardDetail } | undefined, error: unknown, what: string) => {
+  const rollback = (ctx: { previous: BoardDetail | undefined } | undefined, error: unknown, what: string) => {
     if (ctx?.previous) queryClient.setQueryData(key, ctx.previous);
     toast.error(what, { description: error instanceof Error ? error.message : "Please try again." });
   };
