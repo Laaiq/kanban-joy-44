@@ -79,6 +79,18 @@ function AuthPage() {
     navigate({ to: "/workspaces", replace: true });
   }
 
+  async function handleApple() {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
+    if (result.error) {
+      setBusy(false);
+      toast.error("Apple sign-in failed", { description: result.error.message ?? "Please try again." });
+      return;
+    }
+    if (result.redirected) return;
+    navigate({ to: "/workspaces", replace: true });
+  }
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10 text-foreground">
       <KineticBackground />
@@ -174,6 +186,15 @@ function AuthPage() {
                 className="w-full rounded-xl border border-border bg-frost/60 px-4 py-2.5 text-sm font-medium text-ice transition-colors hover:bg-accent disabled:opacity-60"
               >
                 Continue with Google
+              </button>
+
+              <button
+                type="button"
+                onClick={handleApple}
+                disabled={busy}
+                className="w-full rounded-xl border border-border bg-frost/60 px-4 py-2.5 text-sm font-medium text-ice transition-colors hover:bg-accent disabled:opacity-60"
+              >
+                Continue with Apple
               </button>
             </form>
           )}
