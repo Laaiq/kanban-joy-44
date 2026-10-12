@@ -107,7 +107,10 @@ function BoardPage() {
     onError: (error, _v, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
       toast.error("Card not moved", {
-        description: error instanceof Error ? error.message : "It's back where it was. Please try again.",
+        description:
+          error instanceof Error && error.message !== "Failed to fetch"
+            ? error.message
+            : "Connection dropped — the card is back where it was. Please try again.",
       });
     },
     onSettled: async () => {
