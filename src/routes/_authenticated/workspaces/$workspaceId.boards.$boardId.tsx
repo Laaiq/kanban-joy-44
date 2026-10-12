@@ -129,8 +129,8 @@ function BoardPage() {
   };
 
   const finishDrop = () => {
-    if (dragId && dropAt && data) {
-      const from = data.columns.find((c) => c.cards.some((card) => card.id === dragId));
+    if (dragId && dropAt && boardData) {
+      const from = boardData.columns.find((c) => c.cards.some((card) => card.id === dragId));
       const currentIndex = from?.cards.filter((c) => c.id !== dragId).length ?? 0;
       const oldIndex = from?.cards.findIndex((c) => c.id === dragId) ?? -1;
       const unchanged = from?.id === dropAt.columnId && oldIndex === dropAt.index;
@@ -140,7 +140,7 @@ function BoardPage() {
     setDropAt(null);
   };
 
-  const data = board.data;
+  const boardData = board.data;
 
   if (board.isPending) {
     return (
@@ -175,6 +175,7 @@ function BoardPage() {
     );
   }
 
+  const data = board.data;
   const canEdit = data.myRole === "owner" || data.myRole === "editor";
 
   return (
