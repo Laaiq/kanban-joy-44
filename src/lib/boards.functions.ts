@@ -493,3 +493,49 @@ export const getRoadmap = createServerFn({ method: "GET" })
       items,
     };
   });
+
+export const moveCard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ cardId: uuid, columnId: uuid, index: z.number().int().min(0).max(10000) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: card } = await supabase.from("cards").select("id, board_id").eq("id", data.cardId).maybeSingle();
+    if (!card) throw new Error("This card no longer exists.");
+    const { data: column } = await supabase
+      .from("board_columns")
+      .select("id")
+      .eq("id", data.columnId)
+      .eq("board_id", card.board_id)
+      .maybeSingle();
+    if (!column) throw new Error("That column isn't on this board anymore.");
+
+    const { data: siblings, error } = await supabase
+      .from("cards")
+      .select("id")
+      .eq("column_id", data.columnId)
+      .neq("id", data.cardId)
+      .order("position", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw new Error("We couldn't move that card.");
+
+    const order = (siblings ?? []).map((s) => s.id as string);
+    order.splice(Math.min(data.index, order.length), 0, data.cardId);
+
+    const { data: moved, error: moveError } = await supabase
+      .from("cards")
+      .update({ column_id: data.columnId, position: order.indexOf(data.cardId) })
+      .eq("id", data.cardId)
+      .select("id");
+    if (moveError) throw new Error("We couldn't move that card.");
+    if (!moved?.length) throw new Error("Only owners and editors can move cards.");
+
+    const results = await Promise.all(
+      order.map((id, position) =>
+        id === data.cardId ? null : supabase.from("cards").update({ position }).eq("id", id),
+      ),
+    );
+    if (results.some((r) => r?.error)) throw new Error("The card moved, but the column order didn't save.");
+    return { ok: true as const };
+  });
