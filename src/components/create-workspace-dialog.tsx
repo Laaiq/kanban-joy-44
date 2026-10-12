@@ -81,7 +81,7 @@ export function CreateWorkspaceDialog({ open, onClose }: { open: boolean; onClos
           </div>
 
           <p className="rounded-xl border border-border bg-frost/40 px-3 py-2.5 text-xs leading-relaxed text-mist">
-            You become the owner. Only owners can invite people, change roles, or delete the workspace — and only
+            You become the owner. Only owners can invite people, change roles, or delete the workspace and only
             members can see anything inside it.
           </p>
 

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import meridianLogo from "@/img/Meridian.png";
 import { KineticBackground } from "@/components/kinetic-background";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -84,10 +84,8 @@ function AuthPage() {
       <KineticBackground />
 
       <div className="relative z-10 w-full max-w-md">
-        <Link to="/" className="mb-6 flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-xl border border-volt/30 bg-volt/10 font-display text-lg font-bold text-volt">
-            M
-          </div>
+        <Link to="/" className="mb-6 flex items-center align-center self-center justify-center gap-3">
+          <img src={meridianLogo} alt="Meridian" className="size-10 rounded-xl" />
           <div>
             <p className="font-display text-lg font-semibold leading-none tracking-tight">Meridian</p>
             <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-mist">Workspaces · Roles</p>

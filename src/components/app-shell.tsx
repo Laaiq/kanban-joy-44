@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-
+import meridianLogo from "@/img/Meridian.png";
 import { KineticBackground } from "@/components/kinetic-background";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,9 +28,7 @@ export function AppShell({ eyebrow, children }: { eyebrow: string; children: Rea
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-5 px-6 py-6">
         <header className="flex items-center justify-between">
           <Link to="/workspaces" className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-xl border border-volt/30 bg-volt/10 font-display text-lg font-bold text-volt">
-              M
-            </div>
+             <img src={meridianLogo} alt="Meridian" className="size-10 rounded-xl" />
             <div>
               <p className="font-display text-lg font-semibold leading-none tracking-tight">Meridian</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-mist">{eyebrow}</p>
