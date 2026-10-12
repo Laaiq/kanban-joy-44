@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
 import { CardDialog } from "@/components/card-dialog";
-import { createColumn, deleteCard, getBoard, type BoardDetail, type Card } from "@/lib/boards.functions";
+import { createColumn, deleteCard, getBoard, moveCard, type BoardDetail, type Card } from "@/lib/boards.functions";
 
 export const Route = createFileRoute("/_authenticated/workspaces/$workspaceId/boards/$boardId")({
   head: () => ({
@@ -31,6 +31,9 @@ function BoardPage() {
   const fetchBoard = useServerFn(getBoard);
   const addColumn = useServerFn(createColumn);
   const dropCard = useServerFn(deleteCard);
+  const shiftCard = useServerFn(moveCard);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropAt, setDropAt] = useState<{ columnId: string; index: number } | null>(null);
 
   const [dialog, setDialog] = useState<{ columnId: string; card: Card | null } | null>(null);
   const [columnName, setColumnName] = useState("");
@@ -80,6 +83,65 @@ function BoardPage() {
     },
   });
 
+  const moveMutation = useMutation({
+    mutationFn: (v: { cardId: string; columnId: string; index: number }) => shiftCard({ data: v }),
+    onMutate: async ({ cardId, columnId, index }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<BoardDetail>(queryKey);
+      if (previous) {
+        const moving = previous.columns.flatMap((c) => c.cards).find((c) => c.id === cardId);
+        if (moving) {
+          queryClient.setQueryData<BoardDetail>(queryKey, {
+            ...previous,
+            columns: previous.columns.map((column) => {
+              const rest = column.cards.filter((c) => c.id !== cardId);
+              if (column.id !== columnId) return { ...column, cards: rest };
+              rest.splice(Math.min(index, rest.length), 0, { ...moving, columnId });
+              return { ...column, cards: rest };
+            }),
+          });
+        }
+      }
+      return { previous };
+    },
+    onError: (error, _v, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      toast.error("Card not moved", {
+        description: error instanceof Error ? error.message : "It's back where it was. Please try again.",
+      });
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey: ["roadmap", workspaceId] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", workspaceId] });
+    },
+  });
+
+  const indexFromPointer = (section: HTMLElement, y: number) => {
+    const items = [...section.querySelectorAll<HTMLElement>("[data-card-id]")].filter(
+      (el) => el.dataset["cardId"] !== dragId,
+    );
+    const i = items.findIndex((el) => {
+      const r = el.getBoundingClientRect();
+      return y < r.top + r.height / 2;
+    });
+    return i === -1 ? items.length : i;
+  };
+
+  const finishDrop = () => {
+    if (dragId && dropAt && data) {
+      const from = data.columns.find((c) => c.cards.some((card) => card.id === dragId));
+      const currentIndex = from?.cards.filter((c) => c.id !== dragId).length ?? 0;
+      const oldIndex = from?.cards.findIndex((c) => c.id === dragId) ?? -1;
+      const unchanged = from?.id === dropAt.columnId && oldIndex === dropAt.index;
+      if (!unchanged && currentIndex >= 0) moveMutation.mutate({ cardId: dragId, ...dropAt });
+    }
+    setDragId(null);
+    setDropAt(null);
+  };
+
+  const data = board.data;
+
   if (board.isPending) {
     return (
       <AppShell eyebrow="Workspace · Board">
@@ -113,7 +175,6 @@ function BoardPage() {
     );
   }
 
-  const data = board.data;
   const canEdit = data.myRole === "owner" || data.myRole === "editor";
 
   return (
@@ -139,6 +200,10 @@ function BoardPage() {
         </Link>
       </div>
 
+      {canEdit && (
+        <p className="text-[11px] text-mist">Drag cards to move them between columns or reorder them.</p>
+      )}
+
       {!canEdit && (
         <div className="glass-panel flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-mist">
           <span className="grid size-6 place-items-center rounded-md bg-volt/15 text-volt">i</span>
@@ -148,7 +213,23 @@ function BoardPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {data.columns.map((column) => (
-          <section key={column.id} className="glass-panel rounded-2xl p-4">
+          <section
+            key={column.id}
+            className={`glass-panel rounded-2xl p-4 transition-shadow ${
+              dropAt?.columnId === column.id ? "ring-2 ring-volt/60 shadow-volt" : ""
+            }`}
+            onDragOver={(event) => {
+              if (!dragId) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              const index = indexFromPointer(event.currentTarget, event.clientY);
+              if (dropAt?.columnId !== column.id || dropAt.index !== index) setDropAt({ columnId: column.id, index });
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              finishDrop();
+            }}
+          >
             <div className="mb-3 flex items-center justify-between">
               <span className="font-display text-sm font-semibold">{column.name}</span>
               <span className="rounded-md bg-frost px-2 py-0.5 text-xs text-mist">{column.cards.length}</span>
@@ -160,8 +241,28 @@ function BoardPage() {
                   Nothing here yet
                 </p>
               )}
-              {column.cards.map((card) => (
-                <article key={card.id} className="rounded-xl border border-border bg-ink2/60 p-3">
+              {column.cards.map((card, cardIndex) => (
+                <div key={card.id}>
+                {dropAt?.columnId === column.id &&
+                  dropAt.index === column.cards.filter((c) => c.id !== dragId).findIndex((c) => c.id === card.id) &&
+                  card.id !== dragId && <div className="mb-2 h-0.5 rounded-full bg-volt shadow-volt" />}
+                <article
+                  data-card-id={card.id}
+                  data-index={cardIndex}
+                  draggable={canEdit}
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", card.id);
+                    setDragId(card.id);
+                  }}
+                  onDragEnd={() => {
+                    setDragId(null);
+                    setDropAt(null);
+                  }}
+                  className={`rounded-xl border border-border bg-ink2/60 p-3 transition-opacity ${
+                    canEdit ? "cursor-grab active:cursor-grabbing" : ""
+                  } ${dragId === card.id ? "opacity-40" : ""}`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="text-sm font-medium leading-snug">{card.title}</h3>
                     {canEdit && (
@@ -204,7 +305,11 @@ function BoardPage() {
                     {card.dueDate ? ` · due ${card.dueDate}` : ""}
                   </p>
                 </article>
+                </div>
               ))}
+              {dropAt?.columnId === column.id &&
+                dropAt.index >= column.cards.filter((c) => c.id !== dragId).length &&
+                column.cards.some((c) => c.id !== dragId) && <div className="h-0.5 rounded-full bg-volt shadow-volt" />}
             </div>
 
             {canEdit && (
